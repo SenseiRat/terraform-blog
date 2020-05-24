@@ -23,10 +23,10 @@ resource "aws_instance" "wp_dev" {
     command = <<EOD
 cat <<EOF > aws_hosts
 [dev]
-aws_instance.wp_dev.public_ip
+${aws_instance.wp_dev.public_ip}
 [dev:vars]
-s3code=aws_s3_bucket.code.bucket
-domain=var.domain_name
+s3code=${aws_s3_bucket.code.bucket}
+domain=${var.domain_name}
 EOF
 EOD
 }
