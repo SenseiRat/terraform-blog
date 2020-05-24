@@ -13,3 +13,10 @@ variable "vpc_cidr" {}
 variable "cidrs" {
   type = map
 }
+
+# RDS variables
+variable "db_storage" {}
+variable "db_instance_class" {}
+variable "dbname" {}
+variable "dbuser" {}
+variable "dbpassword" {}
