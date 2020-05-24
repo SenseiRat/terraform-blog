@@ -26,3 +26,11 @@ variable "dev_instance_type" {}
 variable "dev_ami" {}
 variable "public_key_path" {}
 variable "key_name" {}
+
+# ASG Variables
+variable "asg_min" {}
+variable "asg_max" {}
+variable "asg_grace" {}
+variable "asg_hct" {}
+variable "asg_cap" {}
+variable "lc_instance_type" {}
