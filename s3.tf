@@ -25,3 +25,17 @@ resource "aws_s3_bucket" "data" {
     Name = "data bucket"
   }
 }
+
+resource "random_id" "wp_logs_bucket" {
+  byte_length = 2
+}
+
+resource "aws_s3_bucket" "logs" {
+  bucket = "${var.domain_name}-${random_id.wp_logs_bucket.dec}"
+  acl = "private"
+  force_destroy = true
+
+  tags = {
+    Name = "logs bucket"
+  }
+}
