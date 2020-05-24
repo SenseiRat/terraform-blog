@@ -11,3 +11,4 @@ cidrs = {
   rds3 = "10.1.7.0/24"
 }
 localip = "209.6.72.119/32"
+domain_name = "senseirat"

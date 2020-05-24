@@ -1,5 +1,6 @@
 # Dev IP Variable
 variable "localip" {}
+variable "domain_name" {}
 
 # Provider Variables
 variable "aws_region" {}
