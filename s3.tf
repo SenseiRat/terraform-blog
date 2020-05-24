@@ -1,39 +1,45 @@
-resource "random_id" "wp_code_bucket" {
-  byte_length = 2
-}
-
 resource "aws_s3_bucket" "code" {
-  bucket        = "${var.domain_name}-${random_id.wp_code_bucket.dec}"
+  bucket_prefix = var.domain_name
   acl           = "private"
   force_destroy = true
+  versioning {
+    enabled = false
+  }
 
   tags = {
     Name = "code bucket"
   }
 }
 
-resource "random_id" "wp_data_bucket" {
-  byte_length = 2
-}
-
 resource "aws_s3_bucket" "data" {
-  bucket        = "${var.domain_name}-${random_id.wp_data_bucket.dec}"
+  bucket_prefix        = var.domain_name
   acl           = "private"
   force_destroy = true
+  versioning {
+    enabled = false
+  }
 
   tags = {
     Name = "data bucket"
   }
 }
 
-resource "random_id" "wp_logs_bucket" {
-  byte_length = 2
-}
-
 resource "aws_s3_bucket" "logs" {
-  bucket = "${var.domain_name}-${random_id.wp_logs_bucket.dec}"
+  bucket_prefix = var.domain_name
   acl = "private"
   force_destroy = true
+  versioning {
+    enabled = false
+  }
+  lifecycle_rule {
+    enabled = true
+    tags = {
+      Name = "log rotation"
+    }
+    expiration {
+      days = 14
+    }
+  }
 
   tags = {
     Name = "logs bucket"
