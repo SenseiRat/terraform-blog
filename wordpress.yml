@@ -5,19 +5,21 @@
   tasks:
     - name: Install Apache
       yum:
-        name: "{{ item }}"
+        name: "{{ packages }}"
         state: present
-      with_items:
-      - httpd
-      - php
-      - php-mysql
+      vars:
+        packages:
+        - httpd
+        - php
+        - php-mysql
     - name: Extract Wordpress
       unarchive:
-        src: http://wordpress.org/wordpress-latest.tar.gz
+        src: https://wordpress.org/latest.tar.gz
         dest: /var/www/html
         owner: apache
         group: apache
         mode: '0755'
+        remote_src: true
         extra_opts:
         - --strip-components=1
     - name: Start and enable Apache
