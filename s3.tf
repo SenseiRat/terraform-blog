@@ -3,8 +3,8 @@ resource "random_id" "wp_code_bucket" {
 }
 
 resource "aws_s3_bucket" "code" {
-  bucket = "${var.domain_name}-${random_id.wp_code_bucket.dec}"
-  acl = "private"
+  bucket        = "${var.domain_name}-${random_id.wp_code_bucket.dec}"
+  acl           = "private"
   force_destroy = true
 
   tags = {
@@ -17,8 +17,8 @@ resource "random_id" "wp_data_bucket" {
 }
 
 resource "aws_s3_bucket" "data" {
-  bucket = "${var.domain_name}-${random_id.wp_data_bucket.dec}"
-  acl = "private"
+  bucket        = "${var.domain_name}-${random_id.wp_data_bucket.dec}"
+  acl           = "private"
   force_destroy = true
 
   tags = {

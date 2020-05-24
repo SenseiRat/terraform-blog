@@ -145,7 +145,7 @@ resource "aws_route_table_association" "wp_public2_assoc" {
 
 # VPC Endpoint for S3
 resource "aws_vpc_endpoint" "wp_private-s3_endpoint" {
-  vpc_id = aws_vpc.wp_vpc.id
+  vpc_id       = aws_vpc.wp_vpc.id
   service_name = "com.amazonaws.${var.aws_region}.s3"
 
   route_table_ids = [
