@@ -1,0 +1,132 @@
+---
+- hosts: all
+  gather_facts: false
+  become: true
+  remote_user: ec2-user
+  tasks:
+    # https://docs.ansible.com/ansible/latest/modules/command_module.html
+    - name: Install amazon-linux-extras
+      command: amazon-linux-extras install -y "{{ item.pkg }}"
+      args:
+        creates: "{{ item.create }}"
+      loop:
+        - {pkg: "php7.4", create: "/usr/bin/php"}
+        - {pkg: "epel", create: "/etc/yum.repos.d/epel.repo"}
+
+    # https://docs.ansible.com/ansible/latest/modules/yum_module.html
+    - name: Update yum
+      yum:
+        update_cache: true
+    - name: Update all packages on server
+      yum:
+        name: '*'
+        state: latest
+    - name: Install Apache and PHP Modules
+      yum:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - httpd
+          - php-xml
+          - php-mbstring
+          - s3fs-fuse
+
+    # https://docs.ansible.com/ansible/latest/modules/unarchive_module.html
+    - name: Extract Wordpress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: /var/www/html
+        owner: apache
+        group: apache
+        mode: '0755'
+        remote_src: true
+        extra_opts:
+        - --strip-components=1
+
+    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html
+    - name: Install WordPress Theme and Plugins
+      unarchive:
+        src: "{{ item.url }}"
+        dest: "{{ item.path }}"
+        owner: apache
+        group: apache
+        remote_src: true
+      loop:
+        - {url: "https://public-api.wordpress.com/rest/v1/themes/download/independent-publisher-2.zip",
+           path: "/var/www/html/wp-content/themes"}
+        - {url: "https://downloads.wordpress.org/plugin/cloudflare.3.4.1.zip",
+           path: "/var/www/html/wp-content/plugins"}
+        - {url: "https://downloads.wordpress.org/plugin/enlighter.4.2.0.zip",
+           path: "/var/www/html/wp-content/plugins"}
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name: Remove default WordPress plugins and themes
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop:
+        - {path: "/var/www/html/wp-content/plugins/akismet"}
+        - {path: "/var/www/html/wp-content/plugins/hello.php"}
+        - {path: "/var/www/html/wp-content/themes/twentyseventeen"}
+        - {path: "/var/www/html/wp-content/themes/twentynineteen"}
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name: Copy wordpress config file
+      copy:
+        src: /var/www/html/wp-config-sample.php
+        dest: /var/www/html/wp-config.php
+        owner: apache
+        group: apache
+        mode: '0755'
+        remote_src: true
+
+    # https://docs.ansible.com/ansible/latest/modules/replace_module.html
+    - name: Configure Wordpress
+      replace:
+        path: /var/www/html/wp-config.php
+        regexp: "{{ item.regex }}"
+        replace: "{{ item.val }}"
+      loop:
+        - {regex: "database_name_here", val: "{{ db_name }}"}
+        - {regex: "username_here", val: "{{ db_user }}"}
+        - {regex: "password_here", val: "{{ db_pass }}"}
+        - {regex: "localhost", val: "{{ db_host }}"}
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name: Make sure the uploads directory exists before we mount it
+      file:
+        path: /var/www/html/wp-content/uploads
+        state: directory
+        owner: apache
+        group: apache
+        mode: '0755'
+
+    # https://github.com/s3fs-fuse/s3fs-fuse
+    - name: Mount the S3 bucket inside of the EC2 instance
+      command: "s3fs -o iam_role={{ server_role }} -o url=http://s3-{{ aws_region }}.amazonaws.com -o endpoint={{ aws_region }} -o allow_other -o use_cache=/tmp -o use_path_request_style {{ bucket_name }} /var/www/html/wp-content/uploads"
+
+    # https://docs.ansible.com/ansible/latest/modules/replace_module.html
+    - name: Configure PHP
+      replace:
+        path: /etc/php.ini
+        regexp: max_execution_time = 30
+        replace: max_execution_time = 90
+
+    # Updatedb and located will make a lot of ListBucket and HeadObject calls to the S3 bucket.
+    # This will disable the mounted directory and reduce the S3 bucket costs
+    - name: Configure updatedb and located to ignore S3 bucket
+      replace:
+        path: /etc/updatedb.conf
+        regexp: '^PRUNEPATHS = "(.*)"$'
+        replace: 'PRUNEPATHS = "\1 /var/www/html/wp-content/uploads"'
+
+    # https://docs.ansible.com/ansible/latest/modules/service_module.html
+    - name: Start and enable Apache/php
+      service:
+        name: "{{ item.svc }}"
+        state: "{{ item.state }}"
+        enabled: true
+      loop:
+        - {svc: "httpd", state: "restarted"}
+        - {svc: "php-fpm", state: "restarted"}
