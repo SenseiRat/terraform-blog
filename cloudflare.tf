@@ -43,7 +43,7 @@ resource "cloudflare_zone_settings_override" "sensei_zone_settings" {
     always_use_https = "on"
     http3            = "on"
     tls_1_3          = "on"
-    min_tls_version  = "1.3"
+    min_tls_version  = "1.2"
     ssl              = "flexible"
     development_mode = "off"
   }
