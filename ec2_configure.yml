@@ -28,6 +28,7 @@
       vars:
         packages:
           - httpd
+          - php-gd
           - php-xml
           - php-mbstring
           - s3fs-fuse
@@ -58,6 +59,10 @@
         - {url: "https://downloads.wordpress.org/plugin/cloudflare.3.4.1.zip",
            path: "/var/www/html/wp-content/plugins"}
         - {url: "https://downloads.wordpress.org/plugin/enlighter.4.2.0.zip",
+           path: "/var/www/html/wp-content/plugins"}
+        - {url: "https://downloads.wordpress.org/plugin/google-site-kit.1.8.1.zip",
+           path: "/var/www/html/wp-content/plugins"}
+        - {url: "https://downloads.wordpress.org/plugin/wordpress-seo.14.2.zip",
            path: "/var/www/html/wp-content/plugins"}
 
     # https://docs.ansible.com/ansible/latest/modules/file_module.html
