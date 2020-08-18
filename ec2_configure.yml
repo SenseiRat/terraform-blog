@@ -126,6 +126,13 @@
         regexp: '^PRUNEPATHS = "(.*)"$'
         replace: 'PRUNEPATHS = "\1 /var/www/html/wp-content/uploads"'
 
+    # Not sure if this will work correctly
+    # - name: Allow .htaccess in apache configuration
+    #   lineinfile:
+    #     path: '/etc/httpd/conf/httpd.conf
+    #     regexp: '(<[dD]irectory /var/www/html>[^<]*)AllowOverride None'
+    #     line: 'AllowOverride All'
+
     # https://docs.ansible.com/ansible/latest/modules/service_module.html
     - name: Start and enable Apache/php
       service:
