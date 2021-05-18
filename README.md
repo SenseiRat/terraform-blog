@@ -11,3 +11,6 @@ correct values before running this.  While there are significantly more
 appropriate methods of storing secrets, I didn't want to build out more 
 infrastructure than was really required to run the blog, and for personal 
 use, this is sufficient.
+
+## To Do
+* Incorporate hybrid cloud environment.
